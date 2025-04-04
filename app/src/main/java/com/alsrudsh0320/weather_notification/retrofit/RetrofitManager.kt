@@ -23,8 +23,8 @@ class RetrofitManager {
         nx: Int,            // 예: 55
         ny: Int,            // 예: 127
         authKey: String,
-        pageNo: Int = 1,
-        numOfRows: Int = 1016,
+        pageNo: Int,
+        numOfRows: Int,
         dataType: String = "JSON"
     ): ShortTermForecastResponseModel? {
         return try {
@@ -43,5 +43,6 @@ class RetrofitManager {
             null
         }
     }
+
 
 }

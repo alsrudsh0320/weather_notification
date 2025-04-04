@@ -18,8 +18,8 @@ android {
 
     defaultConfig {
         applicationId = "com.alsrudsh0320.weather_notification"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = 26
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
@@ -67,4 +67,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.gson)
     implementation(libs.converter.gson)
+
+    // 구글 Play 서비스 위치 라이브러리
+    implementation(libs.play.services.location)
 }

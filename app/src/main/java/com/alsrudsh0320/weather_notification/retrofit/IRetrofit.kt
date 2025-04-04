@@ -18,4 +18,5 @@ interface IRetrofit {
         @Query("ny") ny: Int,
         @Query("authKey") authKey: String
     ): ShortTermForecastResponseModel
+
 }

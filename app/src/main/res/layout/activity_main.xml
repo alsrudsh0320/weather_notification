@@ -22,4 +22,10 @@
         android:layout_height="wrap_content"
         android:text="테스트 버튼"/>
 
+    <Button
+        android:id="@+id/btn_test2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="테스트 버튼2"/>
+
 </LinearLayout>
