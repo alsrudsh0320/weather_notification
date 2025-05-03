@@ -1,31 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="16dp"
     tools:context=".MainActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <!-- 지역 검색 바 -->
+    <androidx.appcompat.widget.SearchView
+        android:id="@+id/sv_region_search"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:queryHint="지역 검색"
+        app:iconifiedByDefault="false"
+        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
-        android:id="@+id/btn_test"
+    <!-- 현재 지역 표시 -->
+    <TextView
+        android:id="@+id/tv_region"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="테스트 버튼"/>
+        android:text="현재 지역"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sv_region_search"
+        android:layout_marginTop="16dp" />
 
-    <Button
-        android:id="@+id/btn_test2"
+    <!-- 위치 새로고침 버튼 -->
+    <ImageButton
+        android:id="@+id/btn_refresh_location"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="위치 새로고침"
+        android:src="@drawable/ic_baseline_my_location_24"
+        app:tint="?android:attr/textColorPrimary"
+        app:layout_constraintTop_toTopOf="@id/tv_region"
+        app:layout_constraintStart_toEndOf="@id/tv_region"
+        android:layout_marginStart="8dp" />
+
+    <!-- 현재 온도 표시 -->
+    <TextView
+        android:id="@+id/tv_temperature"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="테스트 버튼2"/>
+        android:text="--°C"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/tv_region"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="24dp" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
