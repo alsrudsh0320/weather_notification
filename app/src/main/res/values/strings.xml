@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">weather_notification</string>
+
+    <!-- activity_main -->
+    <!-- %1$s → 첫 번째 문자열, %2$s → 두 번째, %3$s → 세 번째 -->
+    <string name="region_name_format">%1$s %2$s %3$s</string>
+    <string name="current_region">현재 지역</string>
+    <string name="refresh_location">위치 새로고침</string>
+    <string name="current_temperature">--°C</string>
 </resources>

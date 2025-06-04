@@ -11,7 +11,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
 import android.Manifest.permission
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
@@ -19,14 +18,12 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
-import androidx.lifecycle.coroutineScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alsrudsh0320.weather_notification.data_load.RegionDataLoader
 import com.alsrudsh0320.weather_notification.data_load.RegionPoint
 import com.alsrudsh0320.weather_notification.databinding.ActivityMainBinding
 import com.alsrudsh0320.weather_notification.layout_adapter.RegionSuggestionAdapter
-import com.alsrudsh0320.weather_notification.location_time.CoordinateConverter
-import com.alsrudsh0320.weather_notification.location_time.LocationHelper
+import com.alsrudsh0320.weather_notification.layout_adapter.ShortTermForecastAdapter
 import com.alsrudsh0320.weather_notification.utils.Constants.TAG
 import com.alsrudsh0320.weather_notification.weather_api_manager.WeatherApiManager
 import kotlinx.coroutines.launch
@@ -39,6 +36,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var regionsList: List<RegionPoint>
     private lateinit var suggestionAdapter: RegionSuggestionAdapter
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,18 +66,10 @@ class MainActivity : AppCompatActivity() {
 
         // JSON에서 로드된 지역 정보를 리스트로 가져옴
         regionsList = RegionDataLoader.loadRegions(this)
-        Log.d(TAG, "Loaded regions: $regionsList")
 
         // RecyclerView, Adapter 준비 + item 눌렀을 때 callback
         suggestionAdapter = RegionSuggestionAdapter(emptyList()) { region ->
-            // 사용자가 항목을 탭했을 때: 리스트 숨김
-
-            binding.rvSuggestions.visibility = View.GONE
-            lifecycleScope.launch {
-                val response = WeatherApiManager.instance.fetchShortTermForecastData(this@MainActivity, region = region)
-                Log.d(TAG, "response: $response")
-            }
-
+            helpApiToUi(region)
         }
         binding.rvSuggestions.apply {
             layoutManager = LinearLayoutManager(this@MainActivity)
@@ -112,14 +102,10 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-
-        // 테스트 버튼을 눌렀을 때
-        binding.btnTest.setOnClickListener {
+        // 위치 새로고침 버튼을 눌렀을 때
+        binding.btnRefreshLocation.setOnClickListener{
             if (checkLocationPermission()) {
-                lifecycleScope.launch {
-                    val response = WeatherApiManager.instance.fetchShortTermForecastData(this@MainActivity)
-                    Log.d(TAG, "response: $response")
-                }
+                helpApiToUi(null)
             } else {
                 // 권한이 없을 때, "다시 묻지 않음" 옵션 선택 여부에 따라 처리
                 if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission.ACCESS_FINE_LOCATION)) {
@@ -129,13 +115,53 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-
-        // 테스트 버튼 2 클릭 리스너 설정: RegionDataLoader 기능 검증
-        binding.btnTest2.setOnClickListener {
+        // 테스트 버튼을 눌렀을 때
+        binding.btnTest.setOnClickListener {
 
         }
 
     }// onCreate
+
+    // api 요청 시작부터 UI 표시까지
+    private fun helpApiToUi(region: RegionPoint?) {
+        // 1) 리스트 숨기고,
+        binding.rvSuggestions.visibility = View.GONE
+
+        // 2) API 콜 + RecyclerView 세팅
+        lifecycleScope.launch {
+            val response = WeatherApiManager.instance.fetchShortTermForecastData(this@MainActivity, region)
+                ?: run {
+                    Toast.makeText(this@MainActivity, "데이터를 가져오지 못했습니다", Toast.LENGTH_SHORT).show()
+                    return@launch
+                }
+
+            // 어댑터 한 번만 생성
+            val adapter = ShortTermForecastAdapter(emptyList())
+            binding.rvShortTermForecast.apply {
+                layoutManager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
+                this.adapter = adapter
+            }
+
+            // 데이터 바인딩
+            response.response?.let {
+                // 1) buildForecastItems() 호출하여 ForecastResult 얻기
+                val result = WeatherApiManager.instance.buildForecastItems(it)
+
+                // 2) 시간별 목록만 어댑터에 업데이트
+                adapter.update(result.hourly)
+
+                binding.tvTmn.text = result.tmn?.let { "최저온도 : $it°C" } ?: "--°C"
+                binding.tvTmx.text = result.tmx?.let { "최고온도 : $it°C" } ?: "--°C"
+
+                // 타이틀 갱신
+                binding.tvRegion.text = getString(
+                    R.string.region_name_format,
+                    response.region.regionLevel1,
+                    response.region.regionLevel2,
+                    response.region.regionLevel3)
+            }
+        }
+    }
 
 
     ///////////////// 여기서 부터 사용자 위치 권한 관련 ///////////////

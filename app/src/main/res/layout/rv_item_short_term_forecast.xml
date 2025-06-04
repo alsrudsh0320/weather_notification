@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="8dp">
+
+    <!-- 예보 시간 -->
+    <TextView
+        android:id="@+id/tvForecastTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="10:00"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <!-- 하늘 상태 아이콘 -->
+    <ImageView
+        android:id="@+id/ivSky"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:src="@drawable/googleg_disabled_color_18"
+        android:contentDescription="하늘상태 아이콘" />
+
+    <!-- 1시간 기온 -->
+    <TextView
+        android:id="@+id/tvTmp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="15°C"
+        android:textSize="35sp" />
+
+    <!-- 강수확률 -->
+    <TextView
+        android:id="@+id/tvPop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="POP 20%"
+        android:textSize="20sp" />
+
+    <!-- 1시간 강수량 -->
+    <TextView
+        android:id="@+id/tvPcp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="PCP 0.5mm"
+        android:textSize="20sp" />
+
+    <!-- 습도 -->
+    <TextView
+        android:id="@+id/tvReh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="REH 60%"
+        android:textSize="20sp" />
+
+    <!-- 풍속 -->
+    <TextView
+        android:id="@+id/tvWsd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="WSD 3.2m/s"
+        android:textSize="20sp" />
+
+</LinearLayout>

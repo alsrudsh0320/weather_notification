@@ -1,7 +1,6 @@
 package com.alsrudsh0320.weather_notification.layout_adapter
 
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.TextView

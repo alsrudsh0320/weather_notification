@@ -64,6 +64,8 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+
+
     // 네트워크 통신 Retrofit
     implementation(libs.retrofit)
     implementation(libs.gson)
