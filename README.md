@@ -43,10 +43,10 @@
 
 ## 📸 스크린샷
 
-| 메인 화면 | 지역 검색 |
-|---|---|
-| <img src="screenshots/main.png" width="250"/> | <img src="screenshots/search.png" width="250"/> |
+| 메인 화면| 지역 검색 |
+|-------------------------------------------|---|
+| <img src="screenshots/main.jpg" width="250"/> | <img src="screenshots/search.jpg" width="250"/> |
 
 | 즐겨찾기 | 알림 설정 |
 |---|---|
-| <img src="screenshots/favorite.png" width="250"/> | <img src="screenshots/notification.png" width="250"/> |
+| <img src="screenshots/favorite.jpg" width="250"/> | <img src="screenshots/notification.jpg" width="250"/> |
