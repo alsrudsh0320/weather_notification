@@ -40,10 +40,13 @@
 
 - 사용자가 설정한 시간에 날씨 알림 제공
 
-## 📱 화면 구성
 
-- 메인 날씨 화면
-- 지역 검색 화면
-- 즐겨찾기 목록
-- 알림 설정 화면
+## 📸 스크린샷
 
+| 메인 화면 | 지역 검색 |
+|---|---|
+| <img src="screenshots/main.png" width="250"/> | <img src="screenshots/search.png" width="250"/> |
+
+| 즐겨찾기 | 알림 설정 |
+|---|---|
+| <img src="screenshots/favorite.png" width="250"/> | <img src="screenshots/notification.png" width="250"/> |
