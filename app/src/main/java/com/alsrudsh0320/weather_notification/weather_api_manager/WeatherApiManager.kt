@@ -4,6 +4,8 @@ import android.content.Context
 import android.util.Log
 import androidx.annotation.DrawableRes
 import com.alsrudsh0320.weather_notification.R
+import com.alsrudsh0320.weather_notification.alarm.AlarmWeatherFormatter
+import com.alsrudsh0320.weather_notification.alarm.AlarmWeatherInfo
 import com.alsrudsh0320.weather_notification.data_load.RegionDataLoader
 import com.alsrudsh0320.weather_notification.data_load.RegionPoint
 import com.alsrudsh0320.weather_notification.layout_adapter.ShortTermForecastItem
@@ -30,7 +32,7 @@ class WeatherApiManager{
         val instance = WeatherApiManager()
     }
 
-    // 단기예보
+    //* 단기예보
     // 현재 날짜, 시간, 사용자 위치정보를 가져와서 단기예보 API 호출 // 그 후 반환 값(response) return
     // 사용자가 검색으로 행정구역을 지정한 경우 해당 위치의 단기예보를 반환
     suspend fun fetchShortTermForecastData(context: Context, region: RegionPoint? = null): RegionForecast? {
@@ -101,7 +103,7 @@ class WeatherApiManager{
 
 
 
-        // 2) 시간별로 그룹핑 (fcstTime 기준, 오름차순 정렬)
+        /** 2) 시간별로 그룹핑 (fcstTime 기준, 오름차순 정렬) */
         val grouped : SortedMap<String, List<Item>> = raw
             // .filter { it.category !in setOf("TMN", "TMX") } // 로그 확인위해 잠깐 빼둠
             .groupBy {
@@ -196,5 +198,78 @@ class WeatherApiManager{
             tmx = tmxValue
         )
     }
+
+    fun buildAlarmWeatherInfo(response: ShortTermForecastResponseModel): AlarmWeatherInfo {
+        val items = response.response.body.items.item
+
+        val today = AlarmWeatherFormatter.currentDate()
+        val currentTime = AlarmWeatherFormatter.currentHourTime()
+
+        fun findValue(category: String, date: String = today, time: String? = null): String? {
+            return items.firstOrNull { item ->
+                item.category == category &&
+                        item.fcstDate == date &&
+                        (time == null || item.fcstTime == time)
+            }?.fcstValue
+        }
+
+        fun findNearestValue(category: String): String? {
+            return items
+                .filter { item ->
+                    item.category == category &&
+                            item.fcstDate == today &&
+                            item.fcstTime >= currentTime
+                }
+                .minByOrNull { it.fcstTime }
+                ?.fcstValue
+        }
+
+        val currentTemp = findNearestValue("TMP")
+        val maxTemp = findValue("TMX")
+
+        val currentSky = findNearestValue("SKY")
+        val currentPty = findNearestValue("PTY")
+
+        val iconResId = when (currentSky) {
+            "1" -> R.drawable.wb_sunny_24
+            "3" -> R.drawable.outline_cloud_24
+            "4" -> when (currentPty) {
+                "0" -> R.drawable.outline_cloud_24
+                "1" -> R.drawable.rainy_24
+                "2" -> R.drawable.rainy_24
+                "3" -> R.drawable.baseline_ac_unit_24
+                "4" -> R.drawable.rainy_heavy_24
+                else -> R.drawable.wb_sunny_24
+            }
+            else -> R.drawable.wb_sunny_24
+        }
+
+        val precipitationItem = items
+            .filter { item ->
+                item.category == "PTY" &&
+                        item.fcstDate == today &&
+                        item.fcstTime >= currentTime &&
+                        AlarmWeatherFormatter.isPrecipitationPty(item.fcstValue)
+            }
+            .minByOrNull { it.fcstTime }
+
+        val precipitationStartHour = precipitationItem
+            ?.fcstTime
+            ?.let { AlarmWeatherFormatter.normalizeHour(it) }
+
+        val precipitationTypeText = AlarmWeatherFormatter.precipitationText(
+            precipitationItem?.fcstValue
+        )
+
+        return AlarmWeatherInfo(
+            currentTemp = currentTemp,
+            maxTemp = maxTemp,
+            skyText = AlarmWeatherFormatter.skyText(currentSky, currentPty),
+            precipitationStartHour = precipitationStartHour,
+            precipitationTypeText = precipitationTypeText,
+            iconResId = iconResId
+        )
+    }
+
 
 }

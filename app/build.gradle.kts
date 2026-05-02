@@ -60,10 +60,11 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.engage.core)
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
 
 
     // 네트워크 통신 Retrofit
@@ -73,4 +74,10 @@ dependencies {
 
     // 구글 Play 서비스 위치 라이브러리
     implementation(libs.play.services.location)
+
+    // Preferences DataStore
+    implementation (libs.androidx.datastore.preferences)
+
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
 }

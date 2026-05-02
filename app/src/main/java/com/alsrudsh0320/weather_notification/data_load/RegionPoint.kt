@@ -4,6 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 
 data class RegionPoint(
+    @SerializedName("행정구역코드") val regionCode: Long,     // 행정구역 코드 (예: 1100000000)
     @SerializedName("1단계") val regionLevel1: String,     // 지역 레벨1: 시/도 단위 (예: "서울특별시")
     @SerializedName("2단계") val regionLevel2: String,     // 지역 레벨2: 시/군/구 단위 (예: "중구"), 없으면 빈 문자열
     @SerializedName("3단계") val regionLevel3: String,     // 지역 레벨3: 동 단위 (예: "태평로1가"), 없으면 빈 문자열

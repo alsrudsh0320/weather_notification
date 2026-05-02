@@ -13,23 +13,27 @@ import androidx.lifecycle.lifecycleScope
 import android.Manifest.permission
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
-import android.util.Log
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.SearchView
+import androidx.core.app.NotificationManagerCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.alsrudsh0320.weather_notification.data_load.RegionDataLoader
 import com.alsrudsh0320.weather_notification.data_load.RegionPoint
 import com.alsrudsh0320.weather_notification.databinding.ActivityMainBinding
+import com.alsrudsh0320.weather_notification.datastore.FavoriteRegion
 import com.alsrudsh0320.weather_notification.layout_adapter.RegionSuggestionAdapter
 import com.alsrudsh0320.weather_notification.layout_adapter.ShortTermForecastAdapter
-import com.alsrudsh0320.weather_notification.utils.Constants.TAG
+import com.alsrudsh0320.weather_notification.viewModel.MainViewModel
 import com.alsrudsh0320.weather_notification.weather_api_manager.WeatherApiManager
 import kotlinx.coroutines.launch
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseActivity() {
     lateinit var binding: ActivityMainBinding
 
     private val LOCATION_PERMISSION_REQUEST_CODE = 1001
@@ -37,35 +41,65 @@ class MainActivity : AppCompatActivity() {
     private lateinit var regionsList: List<RegionPoint>
     private lateinit var suggestionAdapter: RegionSuggestionAdapter
 
+    // datastore - ViewModel - Activity 연동 [Favorite]
+    private var currentRegion: RegionPoint? = null
+    private lateinit var viewModel: MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        enableEdgeToEdge()      // 화면 전체를 활용하기 위함
         setContentView(binding.root)
-        
-        // EdgeToEdge 레이아웃 모드에서 사용자 설정 XML코드의 padding을 적용하기 위한 코드
-        val mainView = findViewById<View>(R.id.main)
-        val origPadding = intArrayOf(
-            mainView.paddingLeft,
-            mainView.paddingTop,
-            mainView.paddingRight,
-            mainView.paddingBottom
-        )
-        // 시스템 바 높이 만큼 적절히 안쪽여백 주기 + 추가 XML코드 설정
-        ViewCompat.setOnApplyWindowInsetsListener(mainView) { v, insets ->
-            val sys = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(
-                origPadding[0] + sys.left,    // left
-                origPadding[1] + sys.top,     // top
-                origPadding[2] + sys.right,   // right
-                origPadding[3] + sys.bottom   // bottom
-            )
-            insets
+        setupEdgeToEdge(binding.root) // baseActivity
+
+
+        /** ViewModelProvider 로 MainViewModel 인스턴스 획득 */
+        viewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.AndroidViewModelFactory.getInstance(application)
+        )[MainViewModel::class.java]
+
+        /** 액티비티 시작 후 즉시
+         * 현재 위치 기반 날씨 API 요청 >> UI */
+        if (checkLocationPermission()) {
+            helpApiToUi(null)
+        } else {
+            // 권한이 없을 때, "다시 묻지 않음" 옵션 선택 여부에 따라 처리
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, permission.ACCESS_FINE_LOCATION)) {
+                showPermissionSettingsDialog()
+            } else {
+                requestLocationPermission()
+            }
         }
 
-        // JSON에서 로드된 지역 정보를 리스트로 가져옴
+        /** JSON에서 로드된 지역 정보를 리스트로 가져옴 */
         regionsList = RegionDataLoader.loadRegions(this)
+
+        /** FavoriteActivity 날씨 요청을 할 경우 */
+        val regionCode = intent.getLongExtra("regionCode", -1L)
+        if (regionCode != -1L) {
+            val selectedRegion = regionsList.firstOrNull { it.regionCode == regionCode }
+            if (selectedRegion != null) {
+                helpApiToUi(selectedRegion)
+            }
+        }
+
+
+        // DataStore 에 저장된 즐겨찾기 변화를 바로 UI 에 반영
+        viewModel.favorites.observe(this) { list ->
+
+            updateFavoriteButton(list)
+        }
+
+        // 즐겨찾기 토글 버튼 클릭
+        binding.btnFavorite.setOnClickListener {
+            currentRegion?.let { viewModel.toggle(it) }
+        }
+
+        // 즐겨찾기 보기 버튼 클릭
+        binding.btnFavoriteList.setOnClickListener {
+            val intent = Intent(this, FavoriteActivity::class.java)
+            startActivity(intent)
+        }
 
         // RecyclerView, Adapter 준비 + item 눌렀을 때 callback
         suggestionAdapter = RegionSuggestionAdapter(emptyList()) { region ->
@@ -115,12 +149,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        // 테스트 버튼을 눌렀을 때
-        binding.btnTest.setOnClickListener {
 
-        }
 
-    }// onCreate
+    } // onCreate
 
     // api 요청 시작부터 UI 표시까지
     private fun helpApiToUi(region: RegionPoint?) {
@@ -150,6 +181,14 @@ class MainActivity : AppCompatActivity() {
                 // 2) 시간별 목록만 어댑터에 업데이트
                 adapter.update(result.hourly)
 
+                // 현재 지역 업데이트
+                currentRegion = response.region
+                updateFavoriteButton(viewModel.favorites.value ?: emptyList())
+
+                binding.tvTemperature.text = result.hourly.firstOrNull()?.tmp?.let {
+                    "${it}°C"
+                } ?: "--°C"
+
                 binding.tvTmn.text = result.tmn?.let { "최저온도 : $it°C" } ?: "--°C"
                 binding.tvTmx.text = result.tmx?.let { "최고온도 : $it°C" } ?: "--°C"
 
@@ -163,6 +202,17 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /** 즐겨찾기 버튼 UI update */
+    private fun updateFavoriteButton(favoriteList: List<FavoriteRegion>) {
+        val isFav = currentRegion?.let { reg ->
+            favoriteList.any { it.region.regionCode == reg.regionCode }
+        } ?: false
+
+        binding.btnFavorite.setImageResource(
+            if (isFav) R.drawable.ic_favorite_enabled_24
+            else R.drawable.ic_favorite_disabled_24
+        )
+    }
 
     ///////////////// 여기서 부터 사용자 위치 권한 관련 ///////////////
 
@@ -191,8 +241,7 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 lifecycleScope.launch {
-                    val response = WeatherApiManager().fetchShortTermForecastData(this@MainActivity)
-                    Log.d(TAG, "response: $response")
+                    helpApiToUi(null)
                 }
 
             } else {

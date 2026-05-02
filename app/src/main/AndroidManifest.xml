@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- 인터넷 권한 -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- 위치 권한 -->
+    <uses-permission android:name="android.permission.INTERNET" /> <!-- 위치 권한 -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" /> <!-- 알림 권한 (Android 13 이상) -->
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        tools:ignore="ProtectedPermissions" />
 
     <application
         android:allowBackup="true"
@@ -20,6 +21,13 @@
         android:theme="@style/Theme.Weather_notification"
         tools:targetApi="31">
         <activity
+            android:name=".BaseActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Weather_notification" />
+        <activity
+            android:name=".FavoriteActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
@@ -27,7 +35,9 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity> <!-- 알람 리시버 -->
+        <receiver android:name=".alarm.WeatherAlarmReceiver"
+            android:exported="false" />
     </application>
 
 </manifest>

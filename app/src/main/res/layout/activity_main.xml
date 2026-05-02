@@ -45,24 +45,39 @@
         app:layout_constraintTop_toBottomOf="@id/sv_region_search"
         app:layout_constraintStart_toStartOf="parent" />
 
+    <!-- '현재 지역' 옆에 즐겨찾기 토글 버튼 추가 -->
+    <ImageButton
+        android:id="@+id/btn_favorite"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="0dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:contentDescription="@string/btn_favorite"
+        android:src="@drawable/ic_favorite_disabled_24"
+        app:layout_constraintStart_toEndOf="@id/tv_region"
+        app:layout_constraintTop_toTopOf="@id/tv_region"
+        app:layout_constraintBottom_toBottomOf="@id/tv_region" />
+
     <!-- 위치 새로고침 버튼: tv_region 바로 오른쪽, baseline 정렬 -->
 
-    <!-- 현재 온도 표시 -->
+
 
     <ImageButton
         android:id="@+id/btn_refresh_location"
         android:layout_width="48dp"
         android:layout_height="48dp"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="0dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:contentDescription="@string/refresh_location"
         android:src="@drawable/ic_baseline_my_location_24"
-        app:layout_constraintStart_toEndOf="@id/tv_region"
-        app:layout_constraintTop_toTopOf="@id/tv_region"
-        app:layout_constraintBottom_toBottomOf="@id/tv_region"
+        app:layout_constraintStart_toEndOf="@id/btn_favorite"
+        app:layout_constraintTop_toTopOf="@id/btn_favorite"
+        app:layout_constraintBottom_toBottomOf="@id/btn_favorite"
         app:tint="?android:attr/textColorPrimary" />
 
-    <!-- 기존의 단일 RecyclerView를 대체하여, 왼쪽에 레이블을 고정하고 오른쪽에 데이터 RecyclerView 배치 -->
+
+    <!-- 현재 온도 표시 -->
+
     <TextView
         android:id="@+id/tv_temperature"
         android:layout_width="wrap_content"
@@ -73,6 +88,18 @@
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/tv_region" />
+
+    <Button
+        android:id="@+id/btn_favorite_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="즐겨찾기목록"
+        app:layout_constraintBottom_toBottomOf="@id/tv_temperature"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toEndOf="@id/tv_temperature"
+        app:layout_constraintTop_toTopOf="@id/tv_temperature"
+        app:layout_constraintVertical_bias="0.0" />
 
     <LinearLayout
         android:id="@+id/ll_temperature_range"
@@ -103,10 +130,10 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="horizontal"
-        app:layout_constraintTop_toBottomOf="@id/ll_temperature_range"
-        app:layout_constraintBottom_toTopOf="@id/btn_test"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintTop_toBottomOf="@id/ll_temperature_range">
 
         <!-- 1) 왼쪽: 고정 레이블 리스트 -->
         <LinearLayout
@@ -119,51 +146,51 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="예보 시간"
                 android:paddingTop="8dp"
-                android:paddingBottom="8dp"/>
+                android:paddingBottom="8dp"
+                android:text="예보 시간" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text=""
                 android:paddingTop="25dp"
-                android:paddingBottom="8dp"/>
+                android:paddingBottom="8dp"
+                android:text="" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="기온 (°C)"
                 android:paddingTop="8dp"
-                android:paddingBottom="8dp"/>
+                android:paddingBottom="8dp"
+                android:text="기온 (°C)" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="강수확률"
                 android:paddingTop="5dp"
-                android:paddingBottom="5dp"/>
+                android:paddingBottom="5dp"
+                android:text="강수확률" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1시간 강수량"
                 android:paddingTop="5dp"
-                android:paddingBottom="5dp"/>
+                android:paddingBottom="5dp"
+                android:text="1시간 강수량" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="습도(%)"
                 android:paddingTop="5dp"
-                android:paddingBottom="5dp"/>
+                android:paddingBottom="5dp"
+                android:text="습도(%)" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="풍속(m/s)"
                 android:paddingTop="5dp"
-                android:paddingBottom="5dp"/>
+                android:paddingBottom="5dp"
+                android:text="풍속(m/s)" />
         </LinearLayout>
 
         <!-- 2) 오른쪽: 실제 데이터 항목을 세로로 뿌려줄 RecyclerView -->
@@ -174,33 +201,7 @@
             android:layout_weight="1"
             android:clipToPadding="false"
             android:paddingStart="8dp"
-            android:paddingEnd="8dp"/>
+            android:paddingEnd="8dp" />
     </LinearLayout>
-
-
-
-    <!-- 테스트 버튼 1 -->
-    <Button
-        android:id="@+id/btn_test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="테스트 버튼"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/btn_test2" />
-
-    <!-- 테스트 버튼 2 -->
-    <Button
-        android:id="@+id/btn_test2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="테스트 버튼 2"
-        android:layout_marginBottom="16dp"
-        android:layout_marginStart="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@id/btn_test"
-        app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
